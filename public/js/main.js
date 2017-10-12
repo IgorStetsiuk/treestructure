@@ -73,17 +73,24 @@
         if (items.length == 0) return null;
 
 
-        items.map(el => {
+        items.forEach(el => {
             let li = document.createElement('li');
-            li.className = 'post';
+            li.className = `post ${el.id}`;
 
             let title = document.createElement('div');
             title.innerHTML = el.title;
             li.appendChild(title);
 
-            return li;
 
+           tree.appendChild(li);
+
+           let nestedTree = rec(data,el.id);
+           if(nestedTree!==null ){
+               li.appendChild(nestedTree);
+           }
         })
+
+
 
         console.log(items);
 
