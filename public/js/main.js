@@ -25,76 +25,104 @@
         xhr.send(null);
     }
 
-    // function rec(data, parentId) {
-    //
-    //     let tree = document.createElement('ul');
-    //     tree.className=parentId;
-    //     parentId = parentId ||1;
-    //
-    //     let items = data.filter(function (el) {
-    //         return el.parent === parentId;
-    //     });
-    //     if (items.length === 0 ) return null;
-    //
-    //     console.log(items);
-    //
-    //     items.forEach(el => {
-    //         let li = document.createElement('li');
-    //         li.className = `post ${el.id}`;
-    //         let title = document.createElement('div');
-    //         title.innerHTML = el.title;
-    //
-    //         li.appendChild(title);
-    //         tree.appendChild(li);
-    //
-    //         let nestedTree = rec(data, el.id);
-    //         if (nestedTree !== null) {
-    //             li.appendChild(nestedTree);
-    //         }
-    //     });
-    //
-    //     return tree;
-    // }
 
-    getRequest(getRoot);
+    getRequest((data) => {
+        data.sort((a, b) => {
+            return a.parent - b.parent;
+        });
 
-    function getRoot(data) {
-        for (let i = 0; i < data.length; i++) {
-            if (!data[i].parent) {
-                render(data[i]);
+        let nestedArray = createNestedArray(data);
+
+        console.table(nestedArray)
+    });
+
+    function createNestedArray(sortedArray) {
+        let result = [];
+
+        sortedArray.forEach(item => {
+            if (!item.parent) {
+                result.push(item);
+                return;
             }
 
-            if (data[i].parent) {
-                let elem = document.getElementsByClassName(`post-${data[i].parent}`);
-                list.insertBefore(elem[0], list.children[0]);
+            let parent = findParent(result, item);
+
+            if (!parent.children) {
+                parent.children = [];
+            }
+
+            parent.children.push(item);
+
+        });
+
+        return result;
+    }
+
+    function findParent(resultArray, item) {
+        let result;
+
+        for (let i = 0, l = resultArray.length; i < l; i++) {
+            let parent = resultArray[i];
+
+            if (parent.id === item.parent) {
+                result = parent;
+                break;
+            }
+
+            if (parent.children) {
+                result = findParent(parent.children, item);
+
+                if (result) break;
             }
         }
+
+        return result;
     }
 
-    function render(item) {
-        let div = document.createElement('div');
-        div.className = `post-${item.id}`;
-        let title = document.createElement('div');
-        title.innerHTML = item.title;
-        div.appendChild(title);
-        list.appendChild(div);
-    }
-
-    // function render(data) {
-    //     data.forEach((el)=>{
-    //         let newRec = rec(data,el.id);
-    //         if(newRec===null){
-    //             let ul = document.createElement('ul');
-    //             ul.className =el.id;
-    //             let title = document.createElement('div');
-    //             title.innerHTML = el.title;
-    //             ul.appendChild(title);
-    //             list.appendChild(ul);
-    //         }else {
-    //             list.appendChild(newRec);
+    // function createNestedArray(sortedArray) {
+    //     let result = [];
+    //
+    //     sortedArray.forEach(item => {
+    //         if (!item.parent) {
+    //             result.push(item);
+    //             return;
     //         }
+    //
+    //         let parent = findParent(result, item);
+    //
+    //         if (!parent.children) {
+    //             parent.children = [];
+    //         }
+    //
+    //         parent.children.push(item);
+    //
     //     });
-    // };
+    //
+    //     return result;
+    // }
+    //
+    // function findParent(resultArray, item) {
+    //     let result;
+    //
+    //     for (let i = 0, l = resultArray.length; i < l; i++) {
+    //         let parent = resultArray[i];
+    //
+    //         if (parent.id === item.parent) {
+    //             result = parent;
+    //             break;
+    //         }
+    //
+    //         if (parent.children) {
+    //            result = findParent(parent.children, item);
+    //
+    //            if (result) break;
+    //         }
+    //     }
+    //
+    //     return result;
+    // }
+
+
 })();
 
 
