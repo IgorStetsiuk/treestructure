@@ -2,6 +2,7 @@
 
 
     const list = document.getElementById('posts-list');
+    let treeFragment = document.createDocumentFragment();
 
 
     function getRequest(callback) {
@@ -32,51 +33,50 @@
         });
 
         let nestedArray = createNestedArray(data);
-
+        treeFragment.appendChild(nestedArray);
+        list.appendChild(treeFragment);
         console.table(nestedArray)
+
     });
 
+    function renderItem(item) {
+
+        let liElement = document.createElement('li');
+
+        liElement.classList.add( `post-${item.id}`);
+        liElement.innerText = item.title ;
+
+        return liElement;
+
+    }
+
     function createNestedArray(sortedArray) {
-        let result = [];
+
+        let resultUl = document.createElement('ul');
+
+        console.table(sortedArray)
+
 
         sortedArray.forEach(item => {
+
             if (!item.parent) {
-                result.push(item);
+                resultUl.appendChild(renderItem(item));
                 return;
             }
 
-            let parent = findParent(result, item);
+            let parent = resultUl.querySelector(`.post-${item.parent}`)
 
-            if (!parent.children) {
-                parent.children = [];
+            if (!parent.children.length) {
+                let ul = document.createElement('ul')
+                parent.appendChild(ul);
             }
 
-            parent.children.push(item);
+            parent.children[0].appendChild(renderItem(item))
 
         });
 
-        return result;
-    }
 
-    function findParent(resultArray, item) {
-        let result;
-
-        for (let i = 0, l = resultArray.length; i < l; i++) {
-            let parent = resultArray[i];
-
-            if (parent.id === item.parent) {
-                result = parent;
-                break;
-            }
-
-            if (parent.children) {
-                result = findParent(parent.children, item);
-
-                if (result) break;
-            }
-        }
-
-        return result;
+        return resultUl;
     }
 
     // function createNestedArray(sortedArray) {
