@@ -1,8 +1,9 @@
 (function () {
 
 
-    const list = document.getElementById('posts-list');
-
+    const postsContainer = document.getElementById('posts-container');
+    const treeUlFragment = document.createDocumentFragment();
+    const modal = document.getElementById('modal-window');
 
     function getRequest(callback) {
 
@@ -25,76 +26,72 @@
         xhr.send(null);
     }
 
-    // function rec(data, parentId) {
-    //
-    //     let tree = document.createElement('ul');
-    //     tree.className=parentId;
-    //     parentId = parentId ||1;
-    //
-    //     let items = data.filter(function (el) {
-    //         return el.parent === parentId;
-    //     });
-    //     if (items.length === 0 ) return null;
-    //
-    //     console.log(items);
-    //
-    //     items.forEach(el => {
-    //         let li = document.createElement('li');
-    //         li.className = `post ${el.id}`;
-    //         let title = document.createElement('div');
-    //         title.innerHTML = el.title;
-    //
-    //         li.appendChild(title);
-    //         tree.appendChild(li);
-    //
-    //         let nestedTree = rec(data, el.id);
-    //         if (nestedTree !== null) {
-    //             li.appendChild(nestedTree);
-    //         }
-    //     });
-    //
-    //     return tree;
-    // }
+    function buildTree(data) {
+        let resultUl = document.createElement('ul');
 
-    getRequest(getRoot);
-
-    function getRoot(data) {
-        for (let i = 0; i < data.length; i++) {
-            if (!data[i].parent) {
-                render(data[i]);
+        resultUl.id = 'posts-list';
+        data.forEach(post => {
+            if (!post.parent) {
+                resultUl.appendChild(renderPost(post));
+                return;
             }
 
-            if (data[i].parent) {
-                let elem = document.getElementsByClassName(`post-${data[i].parent}`);
-                list.insertBefore(elem[0], list.children[0]);
+            let parent = resultUl.querySelector(`.post-${post.parent}`);
+
+            if (!parent.children[0]) {
+                let ul = document.createElement('ul');
+
+                ul.appendChild(renderPost(post));
+                parent.appendChild(ul);
+            } else {
+                parent.children[0].appendChild(renderPost(post));
             }
-        }
+        });
+
+        return resultUl;
     }
 
-    function render(item) {
-        let div = document.createElement('div');
-        div.className = `post-${item.id}`;
-        let title = document.createElement('div');
-        title.innerHTML = item.title;
-        div.appendChild(title);
-        list.appendChild(div);
+
+    function renderPost(post) {
+        let li = document.createElement('li');
+        li.classList.add(`post-${post.id}`);
+        li.textContent = `${post.id} ${post.title}`;
+
+        return li;
     }
 
-    // function render(data) {
-    //     data.forEach((el)=>{
-    //         let newRec = rec(data,el.id);
-    //         if(newRec===null){
-    //             let ul = document.createElement('ul');
-    //             ul.className =el.id;
-    //             let title = document.createElement('div');
-    //             title.innerHTML = el.title;
-    //             ul.appendChild(title);
-    //             list.appendChild(ul);
-    //         }else {
-    //             list.appendChild(newRec);
-    //         }
-    //     });
-    // };
+    getRequest((data) => {
+        let resultTree = buildTree(data);
+
+        treeUlFragment.appendChild(resultTree);
+        postsContainer.appendChild(treeUlFragment);
+        createEvents(postsContainer, data);
+    });
+
+
+    function createEvents(nodeElement, array) {
+        let content;
+        let closeButton = modal.querySelector('.close');
+
+        closeButton.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+
+        nodeElement.addEventListener('click', (event) => {
+
+            let elementClass = event.target.classList[0];
+            let elementId = elementClass.substring(5);
+            let result = array.find(el => {
+                return elementId == el.id;
+            });
+            modal.style.display = 'block';
+            modal.querySelector('.text').innerHTML = result.content;
+            console.log(result)
+        })
+    }
+
+
 })();
 
 
