@@ -5,6 +5,7 @@
     const treeUlFragment = document.createDocumentFragment();
     const modal = document.getElementById('modal-window');
 
+
     function getRequest(callback) {
 
         let data;
@@ -77,7 +78,6 @@
             modal.style.display = 'none';
         });
 
-
         nodeElement.addEventListener('click', (event) => {
 
             let elementClass = event.target.classList[0];
@@ -90,7 +90,6 @@
             console.log(result)
         })
     }
-
 
 })();
 
