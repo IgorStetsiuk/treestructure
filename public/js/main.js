@@ -41,7 +41,7 @@
 
             if (!parent.children[0]) {
                 let ul = document.createElement('ul');
-
+                ul.classList.add('post-children')
                 ul.appendChild(renderPost(post));
                 parent.appendChild(ul);
             } else {
@@ -66,29 +66,44 @@
 
         treeUlFragment.appendChild(resultTree);
         postsContainer.appendChild(treeUlFragment);
-        createEvents(postsContainer, data);
+        addEvents(postsContainer, data);
     });
 
-
-    function createEvents(nodeElement, array) {
-        let content;
+    function addEvents(nodeElement, postsArray) {
         let closeButton = modal.querySelector('.close');
+        let choseNode;
 
         closeButton.addEventListener('click', () => {
             modal.style.display = 'none';
         });
 
         nodeElement.addEventListener('click', (event) => {
+            choseNode = event.target;
+            let postId = choseNode.classList[0].substring(5);
+            let childNode = choseNode.children[0];
 
-            let elementClass = event.target.classList[0];
-            let elementId = elementClass.substring(5);
-            let result = array.find(el => {
-                return elementId == el.id;
-            });
-            modal.style.display = 'block';
-            modal.querySelector('.text').innerHTML = result.content;
-            console.log(result)
+            if (childNode) {
+                childNode.classList.toggle('open');
+                choseNode.style.borderLeft = 'none';
+            }
+
+            if (childNode && childNode.classList.contains('open')) {
+                displayModalWindow(postsArray, postId);
+                choseNode.style.borderLeft = '2px dashed black';
+            } else if (!childNode) {
+                displayModalWindow(postsArray, postId);
+            }
+
         })
+    }
+
+    function displayModalWindow(postsArray, postId) {
+        let result = postsArray.find(el => {
+            return postId == el.id;
+        });
+
+        modal.style.display = 'block';
+        modal.querySelector('.text').innerHTML = result.content;
     }
 
 })();
