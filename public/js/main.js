@@ -4,6 +4,7 @@
     const postsContainer = document.getElementById('posts-container');
     const treeUlFragment = document.createDocumentFragment();
     const modal = document.getElementById('modal-window');
+    const modalContent = modal.firstElementChild;
 
 
     function getRequest(callback) {
@@ -41,7 +42,7 @@
 
             if (!parent.children[0]) {
                 let ul = document.createElement('ul');
-                ul.classList.add('post-children')
+                ul.classList.add('post-children');
                 ul.appendChild(renderPost(post));
                 parent.appendChild(ul);
             } else {
@@ -71,14 +72,13 @@
 
     function addEvents(nodeElement, postsArray) {
         let closeButton = modal.querySelector('.close');
-        let choseNode;
 
         closeButton.addEventListener('click', () => {
             modal.style.display = 'none';
         });
 
         nodeElement.addEventListener('click', (event) => {
-            choseNode = event.target;
+            let choseNode = event.target;
             let postId = choseNode.classList[0].substring(5);
             let childNode = choseNode.children[0];
 
@@ -93,19 +93,45 @@
             } else if (!childNode) {
                 displayModalWindow(postsArray, postId);
             }
-
         })
     }
 
     function displayModalWindow(postsArray, postId) {
-        let result = postsArray.find(el => {
+        let findedPost = postsArray.find(el => {
             return postId == el.id;
         });
 
         modal.style.display = 'block';
-        modal.querySelector('.text').innerHTML = result.content;
+        modal.querySelector('.text').innerHTML = findedPost.content;
     }
 
+    //-- let the popup make draggable & movable.
+    let shift = {x: 0, y: 0};
+
+    modalContent.addEventListener('mousedown', mouseDown);
+
+    function mouseDown(event) {
+        shift.x = event.pageX - modalContent.offsetLeft;
+        shift.y = event.pageY - modalContent.offsetTop;
+        console.log(event.pageY);
+        document.addEventListener('mousemove', modalMove, true);
+    }
+
+    function modalMove(event) {
+        let left = event.pageX - shift.x;
+        let top = event.pageY - shift.y;
+        modalContent.style.top = top + 'px';
+        modalContent.style.left = left + 'px';
+
+    }
+
+    document.addEventListener('mouseup', mouseUp, false);
+
+    function mouseUp() {
+        document.removeEventListener('mousemove', modalMove, true);
+        // modalContent.style.top = '50%';
+        // modalContent.style.left = '50%';
+    }
 })();
 
 

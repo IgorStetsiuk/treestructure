@@ -1,17 +1,17 @@
-h1 {
-    color: red;
-}
 
 li {
     cursor: pointer;
     font-size: 16px;
     margin: 15px 0;
+    padding-left:10px;
     list-style: none;
+
 
 }
 
 .post-children {
     display: none;
+    padding-top: 6px;
 
 }
 
@@ -36,10 +36,14 @@ li {
 /* Modal Content/Box */
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    /*margin: 15% auto; !* 15% from the top and centered *!*/
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 600px; /* Could be more or less, depending on screen size */
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    cursor: move;
 }
 
 /* The Close Button */
