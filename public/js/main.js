@@ -3,8 +3,11 @@
 
     const postsContainer = document.getElementById('posts-container');
     const treeUlFragment = document.createDocumentFragment();
-    const modal = document.getElementById('modal-window');
-    const modalContent = modal.firstElementChild;
+    const modalWindow = document.getElementById('modal-window');
+    const modalContent = modalWindow.getElementsByClassName('modal-content')[0];
+    const modalHeader = modalContent.getElementsByClassName('modal-head')[0];
+    const resizer = modalContent.lastElementChild;
+    const closeButton = modalWindow.querySelector('.close');
 
 
     function getRequest(callback) {
@@ -53,7 +56,6 @@
         return resultUl;
     }
 
-
     function renderPost(post) {
         let li = document.createElement('li');
         li.classList.add(`post-${post.id}`);
@@ -62,20 +64,7 @@
         return li;
     }
 
-    getRequest((data) => {
-        let resultTree = buildTree(data);
-
-        treeUlFragment.appendChild(resultTree);
-        postsContainer.appendChild(treeUlFragment);
-        addEvents(postsContainer, data);
-    });
-
-    function addEvents(nodeElement, postsArray) {
-        let closeButton = modal.querySelector('.close');
-
-        closeButton.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
+    function displayContent(nodeElement, postsArray) {
 
         nodeElement.addEventListener('click', (event) => {
             let choseNode = event.target;
@@ -93,31 +82,50 @@
             } else if (!childNode) {
                 displayModalWindow(postsArray, postId);
             }
-        })
+        });
     }
 
     function displayModalWindow(postsArray, postId) {
+
         let findedPost = postsArray.find(el => {
             return postId == el.id;
         });
+        modalWindow.style.display = 'block';
+        modalWindow.querySelector('.text').innerHTML = findedPost.content;
 
-        modal.style.display = 'block';
-        modal.querySelector('.text').innerHTML = findedPost.content;
+
     }
+
+    getRequest((data) => {
+        let resultTree = buildTree(data);
+
+        treeUlFragment.appendChild(resultTree);
+        postsContainer.appendChild(treeUlFragment);
+        displayContent(postsContainer, data);
+    });
+
+
+    modalHeader.addEventListener('mousedown', dragModal);
+    modalContent.addEventListener('mouseup', stopMoveModal);
+
+    resizer.addEventListener('mousedown', resizeInit);
+
+    closeButton.addEventListener('click', () => {
+        modalWindow.style.display = 'none';
+    });
 
     //-- let the popup make draggable & movable.
     let shift = {x: 0, y: 0};
 
-    modalContent.addEventListener('mousedown', mouseDown);
-
-    function mouseDown(event) {
+    function dragModal(event) {
         shift.x = event.pageX - modalContent.offsetLeft;
         shift.y = event.pageY - modalContent.offsetTop;
         console.log(event.pageY);
-        document.addEventListener('mousemove', modalMove, true);
+        modalContent.addEventListener('mousemove', moveModal, true);
+        // event.stopImmediatePropagation();
     }
 
-    function modalMove(event) {
+    function moveModal(event) {
         let left = event.pageX - shift.x;
         let top = event.pageY - shift.y;
         modalContent.style.top = top + 'px';
@@ -125,13 +133,37 @@
 
     }
 
-    document.addEventListener('mouseup', mouseUp, false);
+    function stopMoveModal() {
+        modalContent.removeEventListener('mousemove', moveModal, true);
 
-    function mouseUp() {
-        document.removeEventListener('mousemove', modalMove, true);
-        // modalContent.style.top = '50%';
-        // modalContent.style.left = '50%';
     }
+
+    // modal window can change size
+    let resize = {startX: 0, startY: 0, startHeight: 0, startWidth: 0};
+
+    function resizeInit(event) {
+        resize.startX = event.clientX;
+        resize.startY = event.clientY;
+        resize.startHeight = parseInt(getComputedStyle(modalContent).height, 10);
+        resize.startWidth = parseInt(getComputedStyle(modalContent).width, 10);
+
+        modalContent.addEventListener('mousemove', doResizeModal, false);
+        modalContent.addEventListener('mouseup', stopResizeModal, false);
+        // event.stopImmediatePropagation();
+    }
+
+    function doResizeModal(e) {
+        modalContent.style.width = (resize.startWidth + e.clientX - resize.startX) + 'px';
+        modalContent.style.height = (resize.startHeight + e.clientY - resize.startY) + 'px';
+
+    }
+
+    function stopResizeModal() {
+        modalContent.removeEventListener('mousemove', doResizeModal);
+        modalContent.removeEventListener('mouseup', stopResizeModal);
+    }
+
+
 })();
 
 
